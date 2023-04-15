@@ -1,0 +1,56 @@
+version: "3"
+services:
+  <app_service_name>:
+    build: ./app
+    container_name: <container_name>
+    links:
+      - <other_container_name>
+    #ports:
+    #  - "8000:8000"
+    environment:
+            #ENVCONFIG: PROD
+        SECRET_KEY: "B\xf0?a\x9a\\\xff\xd4;\x0c\xcbHi"
+        DB_HOST: <database_url>
+        DB_NAME: <database_name>
+        DB_USERNAME: <access_user>
+        DB_PASSWORD: <accesspassword>
+        TZ: "Europe/Ljubljana"
+          #POWERBI_API_KEY: "Cfheq4%O$$%7wTSs4kd7SuFK!a%zT!mDierdM7sDZ8zTKlNW!o2"
+    labels:
+            - "traefik.enable=true"
+            - "traefik.docker.network=traefik_default"
+            - "traefik.http.routers.<router_name>.rule=Host(`<url_for_webpage>`)"
+            - "traefik.http.routers.<router_name>.entrypoints=websecure"
+            - "traefik.http.routers.<router_name>.tls=true"
+            - "traefik.http.routers.<router_name>.tls.certresolver=myresolver"
+            - "traefik.http.routers.<router_name>.service=<service_name>"
+            - "traefik.http.services.<service_name>.loadbalancer.server.port=8000"
+
+    volumes:
+      - ./images/development/products:/app/app/static/images/development/products
+      - ./images/employees:/app/app/static/images/employees
+    networks:
+            - webgateway
+    restart: unless-stopped
+
+  <other_app_service_name:
+    container_name: <other_container_name>
+    image: linuxserver/mariadb
+    #ports:
+    #  - "32000:3306"
+    environment:
+      MYSQL_USER: <access_user>
+      MYSQL_PASSWORD: <accesspassword>
+      MYSQL_ROOT_PASSWORD: <root_mysql_password>
+      MYSQL_DATABASE: <database_name>
+    volumes:
+      - ./mariadb:/config
+      - ./db:/config/initdb.d/:ro
+    networks:
+      - webgateway
+    restart: unless-stopped
+
+networks:
+  webgateway:
+    name: traefik_default
+    external: true
