@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+# Script that rebuilds the docker image from git files on premise
+# Used for quick iterationing for the test server
+# force pulls the lates version from git, makes an image, reloads the docker container with docker compose
+# also, before everything, it makes a copy of the database, for safe keeping
+
+DEALBREAKE_FILE=docker-compose.yml
+GITFILE="app/.git"
+BACKUP_SCRIPT="backups/backup_db.sh"
+DOCKER_SERVICE=<docker container name>
+
+[[ ! -f $DEALBREAKE_FILE ]] && { echo "Docker-compose does not exist. Exiting"; exit 1;}
+[[ ! -r $GITFILE ]] && { echo "git repository does not exist. Exiting"; exit 1;}
+
+# run backup script backup, if exists
+[[ -f $BACKUP_SCRIPT ]] && { ./$BACKUP_SCRIPT; echo "Backup of the database made."; }
+
+# ok, now lets update the container
+
+cd app/
+git fetch  --all
+git reset --hard origin/main
+cd ..
+docker compose up -d --no-deps --build $DOCKER_SERVICE
+
+echo "success"
+exit 0
