@@ -44,3 +44,8 @@ EOF
 
 
 echo "Fzf bindings appended to ~/.bashrc. Run 'source ~/.bashrc' to get it working."
+
+echo "alias plac='du -h --max-depth=1 | sort -hr'"
+echo "Alias 'plac' has been added to the .bashrc file. this command checks the size of current folders"
+
+echo "run 'source ~/.bashrc' to update your bash commands"
